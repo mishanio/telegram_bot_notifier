@@ -16,8 +16,14 @@ repositories {
 }
 
 dependencies {
-	implementation("org.telegram:telegrambots:6.7.0")
+//	Spring
 	implementation("org.springframework.boot:spring-boot-starter")
+
+	implementation("com.squareup.okhttp3:okhttp:4.11.0")
+	implementation("org.telegram:telegrambots:6.7.0")
+
+
+//	Test
 	testImplementation("org.springframework.boot:spring-boot-starter-test")
 }
 
