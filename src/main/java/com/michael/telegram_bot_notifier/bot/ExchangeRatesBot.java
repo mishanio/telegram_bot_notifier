@@ -1,5 +1,6 @@
 package com.michael.telegram_bot_notifier.bot;
 
+import com.michael.telegram_bot_notifier.service.ExchangeService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
@@ -12,13 +13,19 @@ import org.telegram.telegrambots.meta.exceptions.TelegramApiException;
 
 import java.util.Optional;
 
+import static com.michael.telegram_bot_notifier.bot.BotCommands.EUR;
+import static com.michael.telegram_bot_notifier.bot.BotCommands.USD;
+
 @Component
 public class ExchangeRatesBot extends TelegramLongPollingBot {
 
+    private final ExchangeService exchangeService;
+
     private final static Logger log = LoggerFactory.getLogger(ExchangeRatesBot.class);
 
-    public ExchangeRatesBot(@Value("${bot.token}") String token) {
+    public ExchangeRatesBot(@Value("${bot.token}") String token, ExchangeService exchangeService) {
         super(token);
+        this.exchangeService = exchangeService;
     }
 
     @Override
@@ -36,13 +43,17 @@ public class ExchangeRatesBot extends TelegramLongPollingBot {
         BotCommands botCommands = maybeCommand.get();
         switch (botCommands) {
             case START -> startCommand(update.getMessage());
-            case EUR -> {
-            }
-            case USD -> {
-            }
+            case EUR -> getExchangeCommand(update.getMessage(), EUR.toString());
+            case USD -> getExchangeCommand(update.getMessage(), USD.toString());
             case HELP -> {
             }
         }
+    }
+
+    private void getExchangeCommand(Message message, String currency) {
+        Long chatId = message.getChatId();
+        String exchangeRate = exchangeService.getExchangeRate(currency);
+        sendMessage(chatId, exchangeRate);
     }
 
 

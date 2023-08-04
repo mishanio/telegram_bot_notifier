@@ -35,7 +35,7 @@ public class CbrClientManualTest {
 
     @Test
     public void testGetUsdInfo() {
-        String euroRate = exchangeService.getEurExchangeRate();
+        String euroRate = exchangeService.getExchangeRate("eur");
         System.out.println(euroRate);
     }
 

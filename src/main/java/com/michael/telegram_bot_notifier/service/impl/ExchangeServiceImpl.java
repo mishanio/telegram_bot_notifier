@@ -21,17 +21,10 @@ public class ExchangeServiceImpl implements ExchangeService {
 
 
     @Override
-    public String getUsdExchangeRate() {
+    public String getExchangeRate(String currency) {
 
         return client.getCurrencyRates()
-            .flatMap(xml -> extractCurrencyFromXml(xml, "usd"))
-            .orElse("");
-    }
-
-    @Override
-    public String getEurExchangeRate() {
-        return client.getCurrencyRates()
-            .flatMap(xml -> extractCurrencyFromXml(xml, "eur"))
+            .flatMap(xml -> extractCurrencyFromXml(xml, currency))
             .orElse("");
     }
 
