@@ -22,6 +22,8 @@ dependencies {
 	implementation("com.squareup.okhttp3:okhttp:4.11.0")
 	implementation("org.telegram:telegrambots:6.7.0")
 
+	implementation("com.fasterxml.jackson.core:jackson-databind")
+	implementation("com.fasterxml.jackson.dataformat:jackson-dataformat-xml")
 
 //	Test
 	testImplementation("org.springframework.boot:spring-boot-starter-test")
