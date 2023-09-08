@@ -4,6 +4,7 @@ import com.michael.telegram_bot_notifier.service.ExchangeService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 import org.telegram.telegrambots.bots.TelegramLongPollingBot;
 import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
@@ -11,13 +12,17 @@ import org.telegram.telegrambots.meta.api.objects.Message;
 import org.telegram.telegrambots.meta.api.objects.Update;
 import org.telegram.telegrambots.meta.exceptions.TelegramApiException;
 
+import java.util.Map;
 import java.util.Optional;
+import java.util.concurrent.ConcurrentHashMap;
 
 import static com.michael.telegram_bot_notifier.bot.BotCommands.EUR;
 import static com.michael.telegram_bot_notifier.bot.BotCommands.USD;
 
 @Component
 public class ExchangeRatesBot extends TelegramLongPollingBot {
+
+    Map<Long, String> userChatCurrencies = new ConcurrentHashMap<>();
 
     private final ExchangeService exchangeService;
 
@@ -52,8 +57,13 @@ public class ExchangeRatesBot extends TelegramLongPollingBot {
 
     private void getExchangeCommand(Message message, String currency) {
         Long chatId = message.getChatId();
+        userChatCurrencies.put(chatId, currency);
+        sendExchangeResult(chatId, currency);
+    }
+
+    private void sendExchangeResult(Long chatId, String currency) {
         String exchangeRate = exchangeService.getExchangeRate(currency);
-        sendMessage(chatId, exchangeRate);
+        sendMessage(chatId, String.format("%s: %s", currency, exchangeRate));
     }
 
 
@@ -83,5 +93,11 @@ public class ExchangeRatesBot extends TelegramLongPollingBot {
             """.formatted(userName);
 
         sendMessage(chatId, text);
+    }
+
+    @Scheduled(cron = "${cron.scheduler:0 * * ? * *}")
+    private void sendAds() {
+        log.info("sending user notifications {}", userChatCurrencies);
+        userChatCurrencies.forEach(this::sendExchangeResult);
     }
 }
